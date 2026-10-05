@@ -11,6 +11,7 @@ export class Proceso {
   private estado: EstadoProceso;
   private quantumConsumido: number;
   private tiempoBloqueoRestante: number;
+  private eventosES: EventoEntradaSalida[];
 
   constructor(pid: string, memoriaRequerida: number, cpuTotal: number) {
     this.setPid(pid);
@@ -20,6 +21,7 @@ export class Proceso {
     this.setEstado(EstadoProceso.NUEVO);
     this.setQuantumConsumido(0);
     this.setTiempoBloqueoRestante(0);
+    this.setEventosES([]);
   }
 
   public getPid(): string {
@@ -82,5 +84,47 @@ export class Proceso {
   private setTiempoBloqueoRestante(tiempo: number): void {
     exigirEnteroNoNegativo(tiempo, 'El tiempo de bloqueo restante');
     this.tiempoBloqueoRestante = tiempo;
+  }
+
+  private getEventosES(): EventoEntradaSalida[] {
+    return this.eventosES;
+  }
+
+  private setEventosES(eventos: EventoEntradaSalida[]): void {
+    this.eventosES = eventos;
+  }
+
+  public getCpuConsumida(): number {
+    return this.getCpuTotal() - this.getCpuRestante();
+  }
+
+  public terminoSuCpu(): boolean {
+    return this.getCpuRestante() === 0;
+  }
+
+  public agotoQuantum(limite: number): boolean {
+    return this.getQuantumConsumido() >= limite;
+  }
+
+  public terminoSuBloqueo(): boolean {
+    return this.getTiempoBloqueoRestante() === 0;
+  }
+
+  public obtenerDatos(): DatosProceso {
+    return {
+      pid: this.getPid(),
+      memoriaRequerida: this.getMemoriaRequerida(),
+      cpuTotal: this.getCpuTotal(),
+      cpuRestante: this.getCpuRestante(),
+      estado: this.getEstado(),
+      quantumConsumido: this.getQuantumConsumido(),
+      tiempoBloqueoRestante: this.getTiempoBloqueoRestante(),
+    };
+  }
+
+  public ejecutarUnTick(): void {
+    exigir(this.getEstado() === EstadoProceso.EJECUTANDO, `${this.getPid()} no esta ejecutando`);
+    this.setCpuRestante(this.getCpuRestante() - 1);
+    this.setQuantumConsumido(this.getQuantumConsumido() + 1);
   }
 }
