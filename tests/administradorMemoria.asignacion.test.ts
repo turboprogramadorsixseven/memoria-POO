@@ -44,4 +44,27 @@ describe('RF01/RF04 - AdministradorMemoria: asignacion contigua', () => {
     memoria.asignarMemoria('N', 150);
     expect(resumenMapa(memoria.obtenerMapa())).toContain(esperado);
   });
+
+  it('si ningun hueco alcanza falla sin tocar los bloques, aunque la suma libre alcance', () => {
+    const memoria = memoriaConHuecos(new PoliticaPrimerAjuste());
+    const antes = memoria.obtenerMapa();
+    expect(memoria.obtenerMetricas().memoriaLibreTotal).toBe(750);
+    expect(memoria.asignarMemoria('GRANDE', 500)).toBe(false);
+    expect(memoria.obtenerMapa()).toEqual(antes);
+  });
+
+  it('rechaza tamanos invalidos y un proceso que ya tiene memoria', () => {
+    const memoria = new AdministradorMemoria(100, new PoliticaPrimerAjuste());
+    expect(() => memoria.asignarMemoria('P1', 0)).toThrow(/entero positivo/);
+    memoria.asignarMemoria('P1', 10);
+    expect(() => memoria.asignarMemoria('P1', 10)).toThrow(/ya tiene memoria/);
+  });
+
+  it('el mapa es una copia: modificarlo no cambia la memoria real', () => {
+    const memoria = new AdministradorMemoria(100, new PoliticaPrimerAjuste());
+    const mapa = memoria.obtenerMapa();
+    mapa[0].pid = 'INTRUSO';
+    mapa.push({ inicio: 100, tamano: 1, fin: 101, libre: true, pid: null });
+    expect(resumenMapa(memoria.obtenerMapa())).toEqual(['0-100:libre']);
+  });
 });
