@@ -45,4 +45,21 @@ describe('Orden de las fases e invariantes', () => {
     simulador.avanzarTick();
     expect(simulador.obtenerEstado().historialCPU).toEqual(['P1', 'P2']);
   });
+
+  it('en ningun tick hay procesos repetidos, solapamientos ni dos procesos en CPU', () => {
+    const simulador = crearSimulador(700, 2);
+    simulador.registrarProceso('P1', 200, 5);
+    simulador.registrarProceso('P2', 300, 3);
+    simulador.registrarProceso('P3', 250, 4);
+    simulador.registrarProceso('P4', 100, 2);
+    simulador.registrarProceso('P5', 400, 2);
+    simulador.programarEntradaSalida('P2', 1, 2);
+    simulador.programarEntradaSalida('P1', 3, 1);
+    Array.from({ length: 25 }).forEach(() => {
+      simulador.avanzarTick();
+      verificarInvariantes(simulador.obtenerEstado(), 700);
+    });
+    expect(simulador.obtenerEstado().terminados).toHaveLength(5);
+    expect(simulador.obtenerEstado().mapaMemoria).toHaveLength(1);
+  });
 });
