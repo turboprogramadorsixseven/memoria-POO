@@ -1,0 +1,30 @@
+name: Tests y cobertura
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Compilar la biblioteca
+        run: npm run build
+
+      - name: Ejecutar tests con cobertura (falla si lineas <= 90 %)
+        run: npm run test:cov
+
+      - name: Publicar reporte de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-cobertura
+          path: coverage/
