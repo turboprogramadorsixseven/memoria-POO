@@ -7,11 +7,19 @@ export class Proceso {
   private pid: string;
   private memoriaRequerida: number;
   private cpuTotal: number;
+  private cpuRestante: number;
+  private estado: EstadoProceso;
+  private quantumConsumido: number;
+  private tiempoBloqueoRestante: number;
 
   constructor(pid: string, memoriaRequerida: number, cpuTotal: number) {
     this.setPid(pid);
     this.setMemoriaRequerida(memoriaRequerida);
     this.setCpuTotal(cpuTotal);
+    this.setCpuRestante(cpuTotal);
+    this.setEstado(EstadoProceso.NUEVO);
+    this.setQuantumConsumido(0);
+    this.setTiempoBloqueoRestante(0);
   }
 
   public getPid(): string {
@@ -39,5 +47,40 @@ export class Proceso {
   private setCpuTotal(cpuTotal: number): void {
     exigirEnteroPositivo(cpuTotal, 'El tiempo total de CPU');
     this.cpuTotal = cpuTotal;
+  }
+
+  public getCpuRestante(): number {
+    return this.cpuRestante;
+  }
+
+  private setCpuRestante(cpuRestante: number): void {
+    exigirEnteroNoNegativo(cpuRestante, 'La CPU restante');
+    this.cpuRestante = cpuRestante;
+  }
+
+  public getEstado(): EstadoProceso {
+    return this.estado;
+  }
+
+  private setEstado(estado: EstadoProceso): void {
+    this.estado = estado;
+  }
+
+  public getQuantumConsumido(): number {
+    return this.quantumConsumido;
+  }
+
+  private setQuantumConsumido(quantum: number): void {
+    exigirEnteroNoNegativo(quantum, 'El quantum consumido');
+    this.quantumConsumido = quantum;
+  }
+
+  public getTiempoBloqueoRestante(): number {
+    return this.tiempoBloqueoRestante;
+  }
+
+  private setTiempoBloqueoRestante(tiempo: number): void {
+    exigirEnteroNoNegativo(tiempo, 'El tiempo de bloqueo restante');
+    this.tiempoBloqueoRestante = tiempo;
   }
 }
