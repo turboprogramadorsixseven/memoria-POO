@@ -77,4 +77,27 @@ classDiagram
     +getNombre() string
     #comparar(a, b) number
   }
+
+  class PoliticaPeorAjuste {
+    +getNombre() string
+    #comparar(a, b) number
+  }
+
+  class PoliticaPrimerAjuste {
+    +getNombre() string
+    #comparar() number
+  }
+
+  class IPlanificador {
+    <<interface>>
+    +encolar(proceso) void
+    +actualizarBloqueados() void
+    +ejecutarTick() void
+    +getCambiosDeContexto() number
+    +obtenerProcesoEnCPU() DatosProceso | undefined
+    +obtenerListos() DatosProceso[]
+    +obtenerBloqueados() DatosProceso[]
+    +obtenerTerminados() DatosProceso[]
+    +obtenerHistorialCPU() string[]
+  }
 ```
