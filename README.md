@@ -40,3 +40,22 @@ src/
 tests/           un archivo por responsabilidad, con el RF en el nombre de cada test
 docs/            diagrama de clases y diagramas de secuencia (Mermaid, editables)
 ```
+
+## Ejemplo de uso (desde un test)
+
+```ts
+const simulador = new Simulador(new ConfiguracionSimulacion(1024, 2, new PoliticaMejorAjuste()));
+simulador.registrarProceso('P1', 200, 3);
+simulador.programarEntradaSalida('P1', 1, 2); // después de 1 tick de CPU se bloquea 2 ticks
+simulador.avanzarTick(); // admisión → bloqueados → Round-Robin → reloj y métricas
+expect(simulador.obtenerEstado().bloqueados[0].pid).toBe('P1');
+```
+
+## Documentación
+
+- [Diagrama de clases](docs/diagrama-clases.md) · [PNG](docs/img/diagrama-clases.png)
+- Secuencias: [admisión](docs/secuencia-1-admision.md) · [tick Round-Robin](docs/secuencia-2-round-robin.md) · [bloqueo por E/S](docs/secuencia-3-bloqueo-es.md) · [coalescencia](docs/secuencia-4-coalescencia.md)
+- [Matriz RF → clase → tests](docs/matriz-rf.md) · [Decisiones de diseño](docs/decisiones-de-diseno.md)
+
+Los `.md` tienen el código Mermaid editable y `docs/img/` las versiones legibles.
+`package-lock.json` no se versiona: `npm install` resuelve las versiones de `package.json`.
