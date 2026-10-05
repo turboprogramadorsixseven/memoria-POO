@@ -15,6 +15,7 @@ export class Planificador {
   private bloqueados: Proceso[];
   private terminados: Proceso[];
   private cambiosDeContexto: number;
+  private historialCPU: string[];
 
   constructor(quantum: number, memoria: ILiberadorMemoria) {
     this.setQuantum(quantum);
@@ -24,6 +25,7 @@ export class Planificador {
     this.setBloqueados([]);
     this.setTerminados([]);
     this.setCambiosDeContexto(0);
+    this.setHistorialCPU([]);
   }
 
   public getQuantum(): number {
@@ -82,5 +84,50 @@ export class Planificador {
   private setCambiosDeContexto(cantidad: number): void {
     exigirEnteroNoNegativo(cantidad, 'Los cambios de contexto');
     this.cambiosDeContexto = cantidad;
+  }
+
+  private getHistorialCPU(): string[] {
+    return this.historialCPU;
+  }
+
+  private setHistorialCPU(historial: string[]): void {
+    this.historialCPU = historial;
+  }
+
+  public encolar(proceso: Proceso): void {
+    exigir(proceso.getEstado() === EstadoProceso.LISTO, `${proceso.getPid()} no esta Listo`);
+    exigir(!this.getColaListos().includes(proceso), `${proceso.getPid()} ya esta en la cola`);
+    this.getColaListos().push(proceso);
+  }
+
+  public actualizarBloqueados(): void {
+    this.getBloqueados().forEach((proceso) => proceso.avanzarBloqueo());
+    const terminaronSuES = this.getBloqueados().filter((proceso) => proceso.terminoSuBloqueo());
+    this.setBloqueados(this.getBloqueados().filter((proceso) => !proceso.terminoSuBloqueo()));
+    terminaronSuES.forEach((proceso) => {
+      proceso.desbloquear();
+      this.getColaListos().push(proceso);
+    });
+  }
+
+  private despacharSiLaCpuEstaLibre(): void {
+    // si la cpu esta libre toma el primero de la cola
+    const lugaresLibres = 1 - this.getCpu().length;
+    const despachados = this.getColaListos().splice(0, lugaresLibres);
+    despachados.forEach((proceso) => {
+      proceso.despachar();
+      this.getCpu().push(proceso);
+    });
+  }
+
+  private finalizar(proceso: Proceso): void {
+    this.liberarCpu();
+    proceso.terminar();
+    this.getMemoria().liberarMemoria(proceso.getPid());
+    this.getTerminados().push(proceso);
+  }
+
+  private liberarCpu(): void {
+    this.setCpu([]);
   }
 }
