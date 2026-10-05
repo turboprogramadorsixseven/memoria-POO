@@ -7,7 +7,7 @@ import { IPlanificador } from './IPlanificador';
 
 type Regla = [condicion: boolean, accion: () => void];
 
-export class Planificador {
+export class Planificador implements IPlanificador {
   private quantum: number;
   private memoria: ILiberadorMemoria;
   private cpu: Proceso[];
@@ -175,5 +175,17 @@ export class Planificador {
 
   public obtenerListos(): DatosProceso[] {
     return this.getColaListos().map((proceso) => proceso.obtenerDatos());
+  }
+
+  public obtenerBloqueados(): DatosProceso[] {
+    return this.getBloqueados().map((proceso) => proceso.obtenerDatos());
+  }
+
+  public obtenerTerminados(): DatosProceso[] {
+    return this.getTerminados().map((proceso) => proceso.obtenerDatos());
+  }
+
+  public obtenerHistorialCPU(): string[] {
+    return [...this.getHistorialCPU()];
   }
 }
