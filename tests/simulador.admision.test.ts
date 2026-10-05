@@ -41,4 +41,30 @@ describe('RF03 - Estados y admision', () => {
     expect(simulador.consultarProceso('P2').estado).toBe(EstadoProceso.TERMINADO);
     expect(simulador.obtenerEstado().historialCPU).toEqual(['P1', 'P1', 'P2']);
   });
+
+  it('un proceso Terminado no vuelve a ninguna cola', () => {
+    const simulador = crearSimulador();
+    simulador.registrarProceso('P1', 100, 1);
+    simulador.avanzarTicks(3);
+    const estado = simulador.obtenerEstado();
+    expect(pids(estado.terminados)).toEqual(['P1']);
+    expect([...estado.listos, ...estado.bloqueados, ...estado.esperandoMemoria]).toEqual([]);
+  });
+
+  it.each<[string, IPoliticaAsignacion, string]>([
+    ['First-Fit', new PoliticaPrimerAjuste(), '100-200:N'],
+    ['Best-Fit', new PoliticaMejorAjuste(), '900-1000:N'],
+    ['Worst-Fit', new PoliticaPeorAjuste(), '400-500:N'],
+  ])('la politica se elige al configurar y se respeta: %s', (_nombre, politica, esperado) => {
+    const simulador = crearSimulador(1000, 1, politica);
+    simulador.registrarProceso('A', 100, 5);
+    simulador.registrarProceso('B', 200, 1);
+    simulador.registrarProceso('C', 100, 5);
+    simulador.registrarProceso('D', 400, 1);
+    simulador.registrarProceso('E', 100, 5);
+    simulador.avanzarTicks(4);
+    simulador.registrarProceso('N', 100, 1);
+    simulador.avanzarTick();
+    expect(resumenMapa(simulador.obtenerEstado().mapaMemoria)).toContain(esperado);
+  });
 });
