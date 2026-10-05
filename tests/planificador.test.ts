@@ -86,4 +86,45 @@ describe('RF07 - Planificador Round-Robin', () => {
     planificador.encolar(proceso);
     expect(() => planificador.encolar(proceso)).toThrow(/ya esta en la cola/);
   });
+
+  it('las colas que devuelve son copias', () => {
+    const planificador = new Planificador(2, new MemoriaEspia());
+    planificador.encolar(procesoListo('P1', 1));
+    planificador.obtenerListos().pop();
+    planificador.obtenerHistorialCPU().push('INTRUSO');
+    expect(pids(planificador.obtenerListos())).toEqual(['P1']);
+    expect(planificador.obtenerHistorialCPU()).toEqual([]);
+  });
+});
+
+describe('RF08 - Planificador: bloqueo por E/S', () => {
+  it('bloquea, conserva la memoria, no usa CPU y vuelve al final de Listos', () => {
+    const memoria = new MemoriaEspia();
+    const planificador = new Planificador(2, memoria);
+    const p1 = procesoListo('P1', 3);
+    p1.programarEntradaSalida(1, 2);
+    planificador.encolar(p1);
+    planificador.encolar(procesoListo('P2', 4));
+    correrTicks(planificador, 1);
+    expect(pids(planificador.obtenerBloqueados())).toEqual(['P1']);
+    expect(memoria.liberados).toEqual([]);
+    expect(planificador.getCambiosDeContexto()).toBe(1);
+    correrTicks(planificador, 2);
+    expect(planificador.obtenerHistorialCPU()).toEqual(['P1', 'P2', 'P2']);
+    expect(pids(planificador.obtenerListos())).toEqual(['P1', 'P2']);
+    expect(planificador.obtenerBloqueados()).toEqual([]);
+    expect(planificador.getCambiosDeContexto()).toBe(2);
+  });
+
+  it('el bloqueo por E/S tiene prioridad sobre la expulsion por quantum', () => {
+    const planificador = new Planificador(1, new MemoriaEspia());
+    const p1 = procesoListo('P1', 3);
+    p1.programarEntradaSalida(1, 1);
+    planificador.encolar(p1);
+    planificador.encolar(procesoListo('P2', 3));
+    planificador.ejecutarTick();
+    expect(pids(planificador.obtenerBloqueados())).toEqual(['P1']);
+    expect(pids(planificador.obtenerListos())).toEqual(['P2']);
+    expect(planificador.getCambiosDeContexto()).toBe(1);
+  });
 });
