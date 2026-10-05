@@ -45,4 +45,12 @@ describe('RF08 - Simular Entrada y Salida (simulador completo)', () => {
     expect(simulador.obtenerEstado().historialCPU).toEqual(['P1', 'P1']);
     expect(metricas.utilizacionCPU).toBe(50);
   });
+
+  it('rechaza E/S invalidas', () => {
+    const simulador = crearSimulador();
+    simulador.registrarProceso('P1', 100, 3);
+    expect(() => simulador.programarEntradaSalida('P1', 0, 1)).toThrow(/entero positivo/);
+    expect(() => simulador.programarEntradaSalida('P1', 1, 0)).toThrow(/entero positivo/);
+    expect(() => simulador.programarEntradaSalida('P1', 3, 1)).toThrow(/antes de que el proceso termine/);
+  });
 });
