@@ -100,4 +100,45 @@ classDiagram
     +obtenerTerminados() DatosProceso[]
     +obtenerHistorialCPU() string[]
   }
+
+  class Planificador {
+    -quantum: number
+    -memoria: ILiberadorMemoria
+    -cpu: Proceso[]
+    -colaListos: Proceso[]
+    -bloqueados: Proceso[]
+    -terminados: Proceso[]
+    -cambiosDeContexto: number
+    -historialCPU: string[]
+    +getQuantum() number
+    -setQuantum(quantum) void
+    -getMemoria() ILiberadorMemoria
+    -setMemoria(memoria) void
+    -getCpu() Proceso[]
+    -setCpu(cpu) void
+    -getColaListos() Proceso[]
+    -setColaListos(cola) void
+    -getBloqueados() Proceso[]
+    -setBloqueados(bloqueados) void
+    -getTerminados() Proceso[]
+    -setTerminados(terminados) void
+    +getCambiosDeContexto() number
+    -setCambiosDeContexto(cantidad) void
+    -getHistorialCPU() string[]
+    -setHistorialCPU(historial) void
+    +encolar(proceso) void
+    +actualizarBloqueados() void
+    +ejecutarTick() void
+    -despacharSiLaCpuEstaLibre() void
+    -decidirQueSigue(proceso) Function
+    -finalizar(proceso) void
+    -bloquear(proceso) void
+    -expulsar(proceso) void
+    -liberarCpu() void
+    +obtenerProcesoEnCPU() DatosProceso | undefined
+    +obtenerListos() DatosProceso[]
+    +obtenerBloqueados() DatosProceso[]
+    +obtenerTerminados() DatosProceso[]
+    +obtenerHistorialCPU() string[]
+  }
 ```
