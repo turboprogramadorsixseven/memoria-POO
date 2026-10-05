@@ -39,4 +39,51 @@ export class AdministradorMemoria {
   private setBloques(bloques: BloqueMemoria[]): void {
     this.bloques = bloques;
   }
+
+  public asignarMemoria(pid: string, tamano: number): boolean {
+    exigirEnteroPositivo(tamano, 'La memoria pedida');
+    exigir(this.buscarBloqueDe(pid) === undefined, `${pid} ya tiene memoria asignada`);
+    const candidatos = this.getPolitica().ordenarCandidatos(this.getBloques(), tamano);
+    // toma el mejor candidato o ninguno
+    const elegido = candidatos.slice(0, 1);
+    elegido.forEach((bloque) => this.ocuparBloque(bloque, pid, tamano));
+    return elegido.length === 1;
+  }
+
+  private ocuparBloque(bloque: BloqueMemoria, pid: string, tamano: number): void {
+    const posicion = this.getBloques().indexOf(bloque);
+    const sobrante = bloque.asignarA(pid, tamano);
+    this.getBloques().splice(posicion + 1, 0, sobrante);
+    // descarta el sobrante si mide 0
+    this.setBloques(this.getBloques().filter((b) => b.getTamano() > 0));
+  }
+
+  public liberarMemoria(pid: string): void {
+    const bloque = this.buscarBloqueDe(pid);
+    exigir(bloque !== undefined, `${pid} no tiene memoria asignada`);
+    (bloque as BloqueMemoria).liberar();
+    this.unirBloquesLibresVecinos();
+  }
+
+  private unirBloquesLibresVecinos(): void {
+    // une los bloques libres que quedaron pegados
+    const bloques = this.getBloques();
+    const posicionesAUnir = bloques
+      .map((_bloque, posicion) => posicion)
+      .filter((posicion) => posicion < bloques.length - 1)
+      .filter((posicion) => bloques[posicion].puedeUnirseCon(bloques[posicion + 1]))
+      .reverse();
+    posicionesAUnir.forEach((posicion) => {
+      bloques[posicion].unirCon(bloques[posicion + 1]);
+      bloques.splice(posicion + 1, 1);
+    });
+  }
+
+  private buscarBloqueDe(pid: string): BloqueMemoria | undefined {
+    return this.getBloques().find((bloque) => bloque.getPid() === pid);
+  }
+
+  public obtenerMapa(): DatosBloque[] {
+    return this.getBloques().map((bloque) => bloque.obtenerDatos());
+  }
 }
