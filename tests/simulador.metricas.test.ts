@@ -38,4 +38,23 @@ describe('RF09 - Metricas consultables', () => {
       fragmentacionExterna: 25,
     });
   });
+
+  it('se recalculan al final de cada tick', () => {
+    const simulador = crearSimulador();
+    simulador.registrarProceso('P1', 256, 1);
+    expect(simulador.obtenerMetricas().tick).toBe(0);
+    simulador.avanzarTick();
+    expect(simulador.obtenerMetricas()).toMatchObject({
+      tick: 1,
+      ocupacionMemoria: 0,
+      utilizacionCPU: 100,
+    });
+  });
+
+  it('devuelve una copia: modificarla no cambia las metricas del simulador', () => {
+    const simulador = crearSimulador();
+    const metricas = simulador.obtenerMetricas();
+    metricas.cambiosDeContexto = 99;
+    expect(simulador.obtenerMetricas().cambiosDeContexto).toBe(0);
+  });
 });
