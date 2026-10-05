@@ -110,6 +110,15 @@ export class Planificador {
     });
   }
 
+  public ejecutarTick(): void {
+    this.despacharSiLaCpuEstaLibre();
+    [...this.getCpu()].forEach((proceso) => {
+      proceso.ejecutarUnTick();
+      this.getHistorialCPU().push(proceso.getPid());
+      this.decidirQueSigue(proceso)();
+    });
+  }
+
   private despacharSiLaCpuEstaLibre(): void {
     // si la cpu esta libre toma el primero de la cola
     const lugaresLibres = 1 - this.getCpu().length;
@@ -120,6 +129,21 @@ export class Planificador {
     });
   }
 
+  private decidirQueSigue(proceso: Proceso): () => void {
+    const agotoQuantum = proceso.agotoQuantum(this.getQuantum());
+    const hayOtrosListos = this.getColaListos().length > 0;
+    // reglas en orden: terminar, bloquear por E/S, expulsar, renovar quantum, seguir
+    const reglas: Regla[] = [
+      [proceso.terminoSuCpu(), () => this.finalizar(proceso)],
+      [proceso.tieneEntradaSalidaAhora(), () => this.bloquear(proceso)],
+      [agotoQuantum && hayOtrosListos, () => this.expulsar(proceso)],
+      [agotoQuantum, () => proceso.renovarQuantum()],
+      [true, () => undefined],
+    ];
+    const reglasQueSeCumplen = reglas.filter(([condicion]) => condicion);
+    return reglasQueSeCumplen[0][1];
+  }
+
   private finalizar(proceso: Proceso): void {
     this.liberarCpu();
     proceso.terminar();
@@ -127,7 +151,29 @@ export class Planificador {
     this.getTerminados().push(proceso);
   }
 
+  private bloquear(proceso: Proceso): void {
+    this.liberarCpu();
+    proceso.bloquear();
+    this.getBloqueados().push(proceso);
+    this.setCambiosDeContexto(this.getCambiosDeContexto() + 1);
+  }
+
+  private expulsar(proceso: Proceso): void {
+    this.liberarCpu();
+    proceso.expulsar();
+    this.getColaListos().push(proceso);
+    this.setCambiosDeContexto(this.getCambiosDeContexto() + 1);
+  }
+
   private liberarCpu(): void {
     this.setCpu([]);
+  }
+
+  public obtenerProcesoEnCPU(): DatosProceso | undefined {
+    return this.getCpu().map((proceso) => proceso.obtenerDatos())[0];
+  }
+
+  public obtenerListos(): DatosProceso[] {
+    return this.getColaListos().map((proceso) => proceso.obtenerDatos());
   }
 }
