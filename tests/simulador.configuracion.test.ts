@@ -44,3 +44,31 @@ describe('RF01 - Configurar e iniciar la simulacion', () => {
     expect(() => new ConfiguracionSimulacion(memoria, quantum)).toThrow(ErrorDominio);
   });
 });
+
+describe('RF02 - Registrar y consultar procesos', () => {
+  it('registra procesos como Nuevos y se pueden consultar por PID', () => {
+    const simulador = crearSimulador();
+    expect(simulador.registrarProceso('P1', 200, 4).estado).toBe(EstadoProceso.NUEVO);
+    simulador.registrarProceso('P2', 100, 1);
+    expect(pids(simulador.obtenerEstado().nuevos)).toEqual(['P1', 'P2']);
+    expect(simulador.consultarProceso('P1')).toMatchObject({ memoriaRequerida: 200, cpuRestante: 4 });
+  });
+
+  it('rechaza PID repetidos, procesos mas grandes que la memoria y datos invalidos', () => {
+    const simulador = crearSimulador(1024);
+    simulador.registrarProceso('P1', 100, 1);
+    expect(() => simulador.registrarProceso('P1', 50, 1)).toThrow(/PID duplicado/);
+    expect(() => simulador.registrarProceso('P2', 1025, 1)).toThrow(/mas memoria que la total/);
+    expect(() => simulador.registrarProceso('P3', 100, 0)).toThrow(ErrorDominio);
+    expect(pids(simulador.obtenerEstado().nuevos)).toEqual(['P1']);
+  });
+
+  it('acepta un proceso que ocupa exactamente toda la memoria', () => {
+    expect(crearSimulador(512).registrarProceso('P1', 512, 1).memoriaRequerida).toBe(512);
+  });
+
+  it('consultar un PID que no existe es un error', () => {
+    expect(() => crearSimulador().consultarProceso('X')).toThrow(/No existe/);
+    expect(() => crearSimulador().programarEntradaSalida('X', 1, 1)).toThrow(/No existe/);
+  });
+});
