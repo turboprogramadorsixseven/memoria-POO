@@ -106,6 +106,10 @@ export class Proceso {
     return this.getQuantumConsumido() >= limite;
   }
 
+  public tieneEntradaSalidaAhora(): boolean {
+    return this.buscarEventoActual() !== undefined;
+  }
+
   public terminoSuBloqueo(): boolean {
     return this.getTiempoBloqueoRestante() === 0;
   }
@@ -122,9 +126,50 @@ export class Proceso {
     };
   }
 
+  public esperarMemoria(): void {
+    this.cambiarEstado(EstadoProceso.ESPERANDO_MEMORIA, [
+      EstadoProceso.NUEVO,
+      EstadoProceso.ESPERANDO_MEMORIA,
+    ]);
+  }
+
   public ejecutarUnTick(): void {
     exigir(this.getEstado() === EstadoProceso.EJECUTANDO, `${this.getPid()} no esta ejecutando`);
     this.setCpuRestante(this.getCpuRestante() - 1);
     this.setQuantumConsumido(this.getQuantumConsumido() + 1);
+  }
+
+  public renovarQuantum(): void {
+    exigir(this.getEstado() === EstadoProceso.EJECUTANDO, `${this.getPid()} no esta ejecutando`);
+    this.setQuantumConsumido(0);
+  }
+
+  public avanzarBloqueo(): void {
+    exigir(this.getEstado() === EstadoProceso.BLOQUEADO, `${this.getPid()} no esta bloqueado`);
+    this.setTiempoBloqueoRestante(this.getTiempoBloqueoRestante() - 1);
+  }
+
+  public programarEntradaSalida(disparo: number, duracion: number): void {
+    const evento = new EventoEntradaSalida(disparo, duracion);
+    exigir(disparo > this.getCpuConsumida(), 'La E/S tiene que programarse a futuro');
+    exigir(disparo < this.getCpuTotal(), 'La E/S tiene que ocurrir antes de que el proceso termine');
+    exigir(this.buscarEvento(disparo) === undefined, 'Ya hay una E/S programada en ese momento');
+    this.getEventosES().push(evento);
+  }
+
+  private buscarEvento(cpuConsumida: number): EventoEntradaSalida | undefined {
+    return this.getEventosES().find((evento) => evento.getDisparo() === cpuConsumida);
+  }
+
+  private buscarEventoActual(): EventoEntradaSalida | undefined {
+    return this.buscarEvento(this.getCpuConsumida());
+  }
+
+  private cambiarEstado(nuevo: EstadoProceso, permitidosDesde: EstadoProceso[]): void {
+    exigir(
+      permitidosDesde.includes(this.getEstado()),
+      `Transicion invalida de ${this.getPid()}: ${this.getEstado()} -> ${nuevo}`,
+    );
+    this.setEstado(nuevo);
   }
 }
