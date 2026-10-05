@@ -9,7 +9,7 @@ import { ConfiguracionSimulacion } from './ConfiguracionSimulacion';
 import { IAdmision } from './IAdmision';
 import { EstadoSistema, ISimulador, Metricas } from './InterfacesSimulador';
 
-export class Simulador {
+export class Simulador implements ISimulador {
   private configuracion: ConfiguracionSimulacion;
   private memoria: AdministradorMemoria;
   private planificador: IPlanificador;
@@ -30,6 +30,7 @@ export class Simulador {
     this.setAdmision(new ColaDeAdmision(this.getMemoria(), this.getPlanificador()));
     this.setProcesos(new Map());
     this.setTickActual(0);
+    this.setMetricas(this.calcularMetricas());
   }
 
   public getConfiguracion(): ConfiguracionSimulacion {
@@ -114,7 +115,47 @@ export class Simulador {
     return this.getProcesos().get(pid) as Proceso;
   }
 
+  public avanzarTick(): Metricas {
+    this.getAdmision().admitirProcesos(); // 1. admision
+    this.getPlanificador().actualizarBloqueados(); // 2. bloqueados
+    this.getPlanificador().ejecutarTick(); // 3. round robin
+    this.setTickActual(this.getTickActual() + 1); // 4. reloj y metricas
+    this.setMetricas(this.calcularMetricas());
+    return this.obtenerMetricas();
+  }
+
+  public avanzarTicks(cantidad: number): Metricas {
+    exigirEnteroPositivo(cantidad, 'La cantidad de ticks');
+    Array.from({ length: cantidad }).forEach(() => this.avanzarTick());
+    return this.obtenerMetricas();
+  }
+
   public obtenerMetricas(): Metricas {
     return { ...this.getMetricas() };
+  }
+
+  public obtenerEstado(): EstadoSistema {
+    return {
+      tick: this.getTickActual(),
+      procesoEnCPU: this.getPlanificador().obtenerProcesoEnCPU(),
+      nuevos: this.getAdmision().obtenerNuevos(),
+      listos: this.getPlanificador().obtenerListos(),
+      esperandoMemoria: this.getAdmision().obtenerEsperandoMemoria(),
+      bloqueados: this.getPlanificador().obtenerBloqueados(),
+      terminados: this.getPlanificador().obtenerTerminados(),
+      mapaMemoria: this.getMemoria().obtenerMapa(),
+      historialCPU: this.getPlanificador().obtenerHistorialCPU(),
+    };
+  }
+
+  private calcularMetricas(): Metricas {
+    // utilizacion = ticks con cpu ocupada / ticks transcurridos
+    const ticksConCpuOcupada = this.getPlanificador().obtenerHistorialCPU().length;
+    return {
+      ...this.getMemoria().obtenerMetricas(),
+      tick: this.getTickActual(),
+      utilizacionCPU: (ticksConCpuOcupada * 100) / Math.max(this.getTickActual(), 1),
+      cambiosDeContexto: this.getPlanificador().getCambiosDeContexto(),
+    };
   }
 }
