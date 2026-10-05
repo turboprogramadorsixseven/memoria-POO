@@ -4,7 +4,7 @@ import { DatosBloque } from './DatosBloque';
 import { IAsignadorMemoria, ILiberadorMemoria, MetricasMemoria } from './InterfacesMemoria';
 import { IPoliticaAsignacion } from './IPoliticaAsignacion';
 
-export class AdministradorMemoria {
+export class AdministradorMemoria implements IAsignadorMemoria, ILiberadorMemoria {
   private tamanoTotal: number;
   private politica: IPoliticaAsignacion;
   private bloques: BloqueMemoria[];
@@ -85,5 +85,27 @@ export class AdministradorMemoria {
 
   public obtenerMapa(): DatosBloque[] {
     return this.getBloques().map((bloque) => bloque.obtenerDatos());
+  }
+
+  public obtenerMetricas(): MetricasMemoria {
+    const tamanosLibres = this.getBloques()
+      .filter((bloque) => bloque.estaLibre())
+      .map((bloque) => bloque.getTamano());
+    const memoriaLibreTotal = tamanosLibres.reduce((suma, tamano) => suma + tamano, 0);
+    const mayorBloqueLibre = Math.max(0, ...tamanosLibres);
+    const memoriaOcupada = this.getTamanoTotal() - memoriaLibreTotal;
+    return {
+      memoriaTotal: this.getTamanoTotal(),
+      memoriaOcupada,
+      memoriaLibreTotal,
+      mayorBloqueLibre,
+      ocupacionMemoria: (memoriaOcupada * 100) / this.getTamanoTotal(),
+      fragmentacionExterna: this.calcularFragmentacion(memoriaLibreTotal, mayorBloqueLibre),
+    };
+  }
+
+  private calcularFragmentacion(memoriaLibre: number, mayorBloque: number): number {
+    // fragmentacion = 100 * (1 - mayor bloque libre / memoria libre)
+    return ((memoriaLibre - mayorBloque) * 100) / Math.max(memoriaLibre, 1);
   }
 }
