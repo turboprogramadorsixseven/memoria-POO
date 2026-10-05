@@ -1,0 +1,3 @@
+[33mc1a0676[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m chore: configura TypeScript, ts-jest y la cobertura minima
+[33m3b8d18c[m chore: inicializa el proyecto TypeScript con Jest
+[33m4572b02[m Initial commit
