@@ -11,11 +11,19 @@ export class Planificador {
   private quantum: number;
   private memoria: ILiberadorMemoria;
   private cpu: Proceso[];
+  private colaListos: Proceso[];
+  private bloqueados: Proceso[];
+  private terminados: Proceso[];
+  private cambiosDeContexto: number;
 
   constructor(quantum: number, memoria: ILiberadorMemoria) {
     this.setQuantum(quantum);
     this.setMemoria(memoria);
     this.setCpu([]);
+    this.setColaListos([]);
+    this.setBloqueados([]);
+    this.setTerminados([]);
+    this.setCambiosDeContexto(0);
   }
 
   public getQuantum(): number {
@@ -41,5 +49,38 @@ export class Planificador {
 
   private setCpu(cpu: Proceso[]): void {
     this.cpu = cpu;
+  }
+
+  private getColaListos(): Proceso[] {
+    return this.colaListos;
+  }
+
+  private setColaListos(cola: Proceso[]): void {
+    this.colaListos = cola;
+  }
+
+  private getBloqueados(): Proceso[] {
+    return this.bloqueados;
+  }
+
+  private setBloqueados(bloqueados: Proceso[]): void {
+    this.bloqueados = bloqueados;
+  }
+
+  private getTerminados(): Proceso[] {
+    return this.terminados;
+  }
+
+  private setTerminados(terminados: Proceso[]): void {
+    this.terminados = terminados;
+  }
+
+  public getCambiosDeContexto(): number {
+    return this.cambiosDeContexto;
+  }
+
+  private setCambiosDeContexto(cantidad: number): void {
+    exigirEnteroNoNegativo(cantidad, 'Los cambios de contexto');
+    this.cambiosDeContexto = cantidad;
   }
 }
