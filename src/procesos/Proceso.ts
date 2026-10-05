@@ -133,10 +133,27 @@ export class Proceso {
     ]);
   }
 
+  public admitir(): void {
+    this.cambiarEstado(EstadoProceso.LISTO, [
+      EstadoProceso.NUEVO,
+      EstadoProceso.ESPERANDO_MEMORIA,
+    ]);
+  }
+
+  public despachar(): void {
+    this.cambiarEstado(EstadoProceso.EJECUTANDO, [EstadoProceso.LISTO]);
+    this.setQuantumConsumido(0);
+  }
+
   public ejecutarUnTick(): void {
     exigir(this.getEstado() === EstadoProceso.EJECUTANDO, `${this.getPid()} no esta ejecutando`);
     this.setCpuRestante(this.getCpuRestante() - 1);
     this.setQuantumConsumido(this.getQuantumConsumido() + 1);
+  }
+
+  public expulsar(): void {
+    this.cambiarEstado(EstadoProceso.LISTO, [EstadoProceso.EJECUTANDO]);
+    this.setQuantumConsumido(0);
   }
 
   public renovarQuantum(): void {
@@ -144,9 +161,26 @@ export class Proceso {
     this.setQuantumConsumido(0);
   }
 
+  public bloquear(): void {
+    const evento = this.buscarEventoActual();
+    exigir(evento !== undefined, `${this.getPid()} no tiene una E/S en este momento`);
+    this.cambiarEstado(EstadoProceso.BLOQUEADO, [EstadoProceso.EJECUTANDO]);
+    this.setTiempoBloqueoRestante((evento as EventoEntradaSalida).getDuracion());
+  }
+
   public avanzarBloqueo(): void {
     exigir(this.getEstado() === EstadoProceso.BLOQUEADO, `${this.getPid()} no esta bloqueado`);
     this.setTiempoBloqueoRestante(this.getTiempoBloqueoRestante() - 1);
+  }
+
+  public desbloquear(): void {
+    exigir(this.terminoSuBloqueo(), `${this.getPid()} todavia esta esperando su E/S`);
+    this.cambiarEstado(EstadoProceso.LISTO, [EstadoProceso.BLOQUEADO]);
+  }
+
+  public terminar(): void {
+    exigir(this.terminoSuCpu(), `${this.getPid()} todavia necesita CPU`);
+    this.cambiarEstado(EstadoProceso.TERMINADO, [EstadoProceso.EJECUTANDO]);
   }
 
   public programarEntradaSalida(disparo: number, duracion: number): void {
