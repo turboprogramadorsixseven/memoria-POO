@@ -255,4 +255,49 @@ classDiagram
     +obtenerMetricas() Metricas
     +obtenerEstado() EstadoSistema
   }
+
+  class Simulador {
+    -configuracion: ConfiguracionSimulacion
+    -memoria: AdministradorMemoria
+    -planificador: IPlanificador
+    -admision: IAdmision
+    -procesos: Map~string, Proceso~
+    -tickActual: number
+    -metricas: Metricas
+    +getConfiguracion() ConfiguracionSimulacion
+    -setConfiguracion(configuracion) void
+    -getMemoria() AdministradorMemoria
+    -setMemoria(memoria) void
+    -getPlanificador() IPlanificador
+    -setPlanificador(planificador) void
+    -getAdmision() IAdmision
+    -setAdmision(admision) void
+    -getProcesos() Map~string, Proceso~
+    -setProcesos(procesos) void
+    +getTickActual() number
+    -setTickActual(tick) void
+    -getMetricas() Metricas
+    -setMetricas(metricas) void
+    +registrarProceso(pid, memoria, cpuTotal) DatosProceso
+    +programarEntradaSalida(pid, despuesDeTicksDeCpu, duracion) void
+    +consultarProceso(pid) DatosProceso
+    -buscarProceso(pid) Proceso
+    +avanzarTick() Metricas
+    +avanzarTicks(cantidad) Metricas
+    +obtenerMetricas() Metricas
+    +obtenerEstado() EstadoSistema
+    -calcularMetricas() Metricas
+  }
+
+  ISimulador <|.. Simulador : realiza
+  Simulador *-- "1" ConfiguracionSimulacion
+  Simulador *-- "1" AdministradorMemoria
+  Simulador *-- "1" IPlanificador
+  Simulador *-- "1" IAdmision
+  Simulador o-- "0..*" Proceso : procesos
+
+  IAdmision <|.. ColaDeAdmision : realiza
+  ColaDeAdmision o-- "0..*" Proceso : pendientes
+  ColaDeAdmision --> "1" IAsignadorMemoria : memoria
+  ColaDeAdmision --> "1" IPlanificador : planificador
 ```
