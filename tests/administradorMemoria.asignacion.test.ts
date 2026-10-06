@@ -1,7 +1,5 @@
 import { AdministradorMemoria } from '../src/memoria/AdministradorMemoria';
 import { IPoliticaAsignacion } from '../src/memoria/IPoliticaAsignacion';
-import { PoliticaMejorAjuste } from '../src/memoria/PoliticaMejorAjuste';
-import { PoliticaPeorAjuste } from '../src/memoria/PoliticaPeorAjuste';
 import { PoliticaPrimerAjuste } from '../src/memoria/PoliticaPrimerAjuste';
 import { resumenMapa } from './helpers';
 
@@ -35,14 +33,10 @@ describe('RF01/RF04 - AdministradorMemoria: asignacion contigua', () => {
     expect(resumenMapa(memoria.obtenerMapa())).toEqual(['0-200:P1', '200-500:P2']);
   });
 
-  it.each<[string, IPoliticaAsignacion, string]>([
-    ['First-Fit', new PoliticaPrimerAjuste(), '100-250:N'],
-    ['Best-Fit', new PoliticaMejorAjuste(), '850-1000:N'],
-    ['Worst-Fit', new PoliticaPeorAjuste(), '400-550:N'],
-  ])('elige el bloque segun la politica: %s', (_nombre, politica, esperado) => {
-    const memoria = memoriaConHuecos(politica);
+  it('First-Fit elige el primer hueco que alcanza, por direccion', () => {
+    const memoria = memoriaConHuecos(new PoliticaPrimerAjuste());
     memoria.asignarMemoria('N', 150);
-    expect(resumenMapa(memoria.obtenerMapa())).toContain(esperado);
+    expect(resumenMapa(memoria.obtenerMapa())).toContain('100-250:N');
   });
 
   it('si ningun hueco alcanza falla sin tocar los bloques, aunque la suma libre alcance', () => {

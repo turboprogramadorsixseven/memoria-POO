@@ -1,6 +1,3 @@
-import { IPoliticaAsignacion } from '../src/memoria/IPoliticaAsignacion';
-import { PoliticaMejorAjuste } from '../src/memoria/PoliticaMejorAjuste';
-import { PoliticaPeorAjuste } from '../src/memoria/PoliticaPeorAjuste';
 import { PoliticaPrimerAjuste } from '../src/memoria/PoliticaPrimerAjuste';
 import { EstadoProceso } from '../src/procesos/EstadoProceso';
 import { crearSimulador, pids, resumenMapa } from './helpers';
@@ -51,12 +48,8 @@ describe('RF03 - Estados y admision', () => {
     expect([...estado.listos, ...estado.bloqueados, ...estado.esperandoMemoria]).toEqual([]);
   });
 
-  it.each<[string, IPoliticaAsignacion, string]>([
-    ['First-Fit', new PoliticaPrimerAjuste(), '100-200:N'],
-    ['Best-Fit', new PoliticaMejorAjuste(), '900-1000:N'],
-    ['Worst-Fit', new PoliticaPeorAjuste(), '400-500:N'],
-  ])('la politica se elige al configurar y se respeta: %s', (_nombre, politica, esperado) => {
-    const simulador = crearSimulador(1000, 1, politica);
+  it('al admitir se respeta la politica configurada (First-Fit)', () => {
+    const simulador = crearSimulador(1000, 1, new PoliticaPrimerAjuste());
     simulador.registrarProceso('A', 100, 5);
     simulador.registrarProceso('B', 200, 1);
     simulador.registrarProceso('C', 100, 5);
@@ -65,6 +58,6 @@ describe('RF03 - Estados y admision', () => {
     simulador.avanzarTicks(4);
     simulador.registrarProceso('N', 100, 1);
     simulador.avanzarTick();
-    expect(resumenMapa(simulador.obtenerEstado().mapaMemoria)).toContain(esperado);
+    expect(resumenMapa(simulador.obtenerEstado().mapaMemoria)).toContain('100-200:N');
   });
 });

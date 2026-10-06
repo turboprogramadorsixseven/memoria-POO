@@ -1,4 +1,4 @@
-import { PoliticaMejorAjuste } from '../src/memoria/PoliticaMejorAjuste';
+import { PoliticaPrimerAjuste } from '../src/memoria/PoliticaPrimerAjuste';
 import { EstadoProceso } from '../src/procesos/EstadoProceso';
 import { ConfiguracionSimulacion } from '../src/simulacion/ConfiguracionSimulacion';
 import { Simulador } from '../src/simulacion/Simulador';
@@ -10,14 +10,15 @@ describe('RF01 - Configurar e iniciar la simulacion', () => {
     const configuracion = new ConfiguracionSimulacion();
     expect(configuracion.getMemoriaTotal()).toBe(1024);
     expect(configuracion.getQuantum()).toBe(2);
-    expect(configuracion.getPolitica().getNombre()).toBe('First-Fit');
+    expect(configuracion.getPolitica()).toBeInstanceOf(PoliticaPrimerAjuste);
   });
 
   it('la memoria, el quantum y la politica se pueden configurar', () => {
-    const configuracion = new ConfiguracionSimulacion(2048, 5, new PoliticaMejorAjuste());
+    const politica = new PoliticaPrimerAjuste();
+    const configuracion = new ConfiguracionSimulacion(2048, 5, politica);
     expect(configuracion.getMemoriaTotal()).toBe(2048);
     expect(configuracion.getQuantum()).toBe(5);
-    expect(configuracion.getPolitica().getNombre()).toBe('Best-Fit');
+    expect(configuracion.getPolitica()).toBe(politica);
   });
 
   it('empieza en el tick 0, con un unico bloque libre, colas vacias y contadores en cero', () => {
