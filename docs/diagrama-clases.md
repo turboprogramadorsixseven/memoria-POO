@@ -160,4 +160,51 @@ classDiagram
     +getDuracion() number
     -setDuracion(duracion) void
   }
+
+  class Proceso {
+    -pid: string
+    -memoriaRequerida: number
+    -cpuTotal: number
+    -cpuRestante: number
+    -estado: EstadoProceso
+    -quantumConsumido: number
+    -tiempoBloqueoRestante: number
+    -eventosES: EventoEntradaSalida[]
+    +getPid() string
+    -setPid(pid) void
+    +getMemoriaRequerida() number
+    -setMemoriaRequerida(memoria) void
+    +getCpuTotal() number
+    -setCpuTotal(cpuTotal) void
+    +getCpuRestante() number
+    -setCpuRestante(cpuRestante) void
+    +getEstado() EstadoProceso
+    -setEstado(estado) void
+    +getQuantumConsumido() number
+    -setQuantumConsumido(quantum) void
+    +getTiempoBloqueoRestante() number
+    -setTiempoBloqueoRestante(tiempo) void
+    -getEventosES() EventoEntradaSalida[]
+    -setEventosES(eventos) void
+    +getCpuConsumida() number
+    +terminoSuCpu() boolean
+    +agotoQuantum(limite) boolean
+    +tieneEntradaSalidaAhora() boolean
+    +terminoSuBloqueo() boolean
+    +obtenerDatos() DatosProceso
+    +esperarMemoria() void
+    +admitir() void
+    +despachar() void
+    +ejecutarUnTick() void
+    +expulsar() void
+    +renovarQuantum() void
+    +bloquear() void
+    +avanzarBloqueo() void
+    +desbloquear() void
+    +terminar() void
+    +programarEntradaSalida(disparo, duracion) void
+    -buscarEvento(cpuConsumida) EventoEntradaSalida | undefined
+    -buscarEventoActual() EventoEntradaSalida | undefined
+    -cambiarEstado(nuevo, permitidosDesde) void
+  }
 ```
