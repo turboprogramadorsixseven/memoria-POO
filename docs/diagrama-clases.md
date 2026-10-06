@@ -207,4 +207,52 @@ classDiagram
     -buscarEventoActual() EventoEntradaSalida | undefined
     -cambiarEstado(nuevo, permitidosDesde) void
   }
+
+  class ColaDeAdmision {
+    -memoria: IAsignadorMemoria
+    -planificador: IPlanificador
+    -pendientes: Proceso[]
+    -getMemoria() IAsignadorMemoria
+    -setMemoria(memoria) void
+    -getPlanificador() IPlanificador
+    -setPlanificador(planificador) void
+    -getPendientes() Proceso[]
+    -setPendientes(pendientes) void
+    +agregar(proceso) void
+    +admitirProcesos() void
+    +obtenerNuevos() DatosProceso[]
+    +obtenerEsperandoMemoria() DatosProceso[]
+    -obtenerEnEstado(estado) DatosProceso[]
+  }
+
+  class ConfiguracionSimulacion {
+    -memoriaTotal: number
+    -quantum: number
+    -politica: IPoliticaAsignacion
+    +getMemoriaTotal() number
+    -setMemoriaTotal(memoriaTotal) void
+    +getQuantum() number
+    -setQuantum(quantum) void
+    +getPolitica() IPoliticaAsignacion
+    -setPolitica(politica) void
+  }
+
+  class IAdmision {
+    <<interface>>
+    +agregar(proceso) void
+    +admitirProcesos() void
+    +obtenerNuevos() DatosProceso[]
+    +obtenerEsperandoMemoria() DatosProceso[]
+  }
+
+  class ISimulador {
+    <<interface>>
+    +registrarProceso(pid, memoria, cpuTotal) DatosProceso
+    +programarEntradaSalida(pid, despuesDeTicksDeCpu, duracion) void
+    +avanzarTick() Metricas
+    +avanzarTicks(cantidad) Metricas
+    +consultarProceso(pid) DatosProceso
+    +obtenerMetricas() Metricas
+    +obtenerEstado() EstadoSistema
+  }
 ```
