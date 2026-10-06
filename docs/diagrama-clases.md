@@ -1,7 +1,7 @@
 # Diagrama de clases
 
 Generado a partir del código y completado con las relaciones. Visibilidad:
-`+` público, `-` privado, `#` protegido; `*` marca un método abstracto.
+`+` público, `-` privado.
 Doble encapsulamiento: cada atributo privado tiene su `get` y su `set`, y la clase
 sólo lo usa a través de ellos. Se omiten las interfaces de datos que devuelven las
 consultas (`DatosProceso`, `DatosBloque`, `Metricas`, `MetricasMemoria`, `EstadoSistema`).
@@ -65,27 +65,9 @@ classDiagram
     +liberarMemoria(pid) void
   }
 
-  class PoliticaAsignacionBase {
-    <<abstract>>
-    +getNombre()* string
-    +ordenarCandidatos(bloques, tamanoPedido) BloqueMemoria[]
-    #filtrarBloquesAptos(bloques, tamanoPedido) BloqueMemoria[]
-    #comparar(a, b)* number
-  }
-
-  class PoliticaMejorAjuste {
-    +getNombre() string
-    #comparar(a, b) number
-  }
-
-  class PoliticaPeorAjuste {
-    +getNombre() string
-    #comparar(a, b) number
-  }
-
   class PoliticaPrimerAjuste {
     +getNombre() string
-    #comparar() number
+    +ordenarCandidatos(bloques, tamanoPedido) BloqueMemoria[]
   }
 
   class IPlanificador {
@@ -289,12 +271,17 @@ classDiagram
     -calcularMetricas() Metricas
   }
 
+  class ErrorDominio {
+    +ErrorDominio(mensaje)
+  }
+
   ISimulador <|.. Simulador : realiza
   Simulador *-- "1" ConfiguracionSimulacion
   Simulador *-- "1" AdministradorMemoria
   Simulador *-- "1" IPlanificador
   Simulador *-- "1" IAdmision
   Simulador o-- "0..*" Proceso : procesos
+  Error <|-- ErrorDominio
 
   IAdmision <|.. ColaDeAdmision : realiza
   ColaDeAdmision o-- "0..*" Proceso : pendientes
@@ -312,10 +299,7 @@ classDiagram
   AdministradorMemoria --> "1" IPoliticaAsignacion : politica
   ConfiguracionSimulacion --> "1" IPoliticaAsignacion : politica
 
-  IPoliticaAsignacion <|.. PoliticaAsignacionBase : realiza
-  PoliticaAsignacionBase <|-- PoliticaPrimerAjuste
-  PoliticaAsignacionBase <|-- PoliticaMejorAjuste
-  PoliticaAsignacionBase <|-- PoliticaPeorAjuste
+  IPoliticaAsignacion <|.. PoliticaPrimerAjuste : realiza
 
   Proceso --> "1" EstadoProceso : estado
   Proceso *-- "0..*" EventoEntradaSalida : eventosES
