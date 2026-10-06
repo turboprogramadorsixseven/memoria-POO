@@ -300,4 +300,23 @@ classDiagram
   ColaDeAdmision o-- "0..*" Proceso : pendientes
   ColaDeAdmision --> "1" IAsignadorMemoria : memoria
   ColaDeAdmision --> "1" IPlanificador : planificador
+
+  IPlanificador <|.. Planificador : realiza
+  Planificador o-- "0..*" Proceso : colaListos / bloqueados / terminados
+  Planificador o-- "0..1" Proceso : cpu
+  Planificador --> "1" ILiberadorMemoria : memoria
+
+  IAsignadorMemoria <|.. AdministradorMemoria : realiza
+  ILiberadorMemoria <|.. AdministradorMemoria : realiza
+  AdministradorMemoria *-- "1..*" BloqueMemoria : bloques
+  AdministradorMemoria --> "1" IPoliticaAsignacion : politica
+  ConfiguracionSimulacion --> "1" IPoliticaAsignacion : politica
+
+  IPoliticaAsignacion <|.. PoliticaAsignacionBase : realiza
+  PoliticaAsignacionBase <|-- PoliticaPrimerAjuste
+  PoliticaAsignacionBase <|-- PoliticaMejorAjuste
+  PoliticaAsignacionBase <|-- PoliticaPeorAjuste
+
+  Proceso --> "1" EstadoProceso : estado
+  Proceso *-- "0..*" EventoEntradaSalida : eventosES
 ```
