@@ -6,10 +6,7 @@ export { Proceso } from './procesos/Proceso';
 export type { DatosBloque } from './memoria/DatosBloque';
 export { BloqueMemoria } from './memoria/BloqueMemoria';
 export type { IPoliticaAsignacion } from './memoria/IPoliticaAsignacion';
-export { PoliticaAsignacionBase } from './memoria/PoliticaAsignacionBase';
 export { PoliticaPrimerAjuste } from './memoria/PoliticaPrimerAjuste';
-export { PoliticaMejorAjuste } from './memoria/PoliticaMejorAjuste';
-export { PoliticaPeorAjuste } from './memoria/PoliticaPeorAjuste';
 export type {
   IAsignadorMemoria,
   ILiberadorMemoria,
