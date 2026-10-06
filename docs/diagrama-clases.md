@@ -141,4 +141,23 @@ classDiagram
     +obtenerTerminados() DatosProceso[]
     +obtenerHistorialCPU() string[]
   }
+
+  class EstadoProceso {
+    <<enumeration>>
+    NUEVO
+    ESPERANDO_MEMORIA
+    LISTO
+    EJECUTANDO
+    BLOQUEADO
+    TERMINADO
+  }
+
+  class EventoEntradaSalida {
+    -disparo: number
+    -duracion: number
+    +getDisparo() number
+    -setDisparo(disparo) void
+    +getDuracion() number
+    -setDuracion(duracion) void
+  }
 ```
